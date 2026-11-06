@@ -1,0 +1,5 @@
+.brand { display: flex; align-items: center; gap: 12px; color: #f4fbf8; }
+.brand-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; color: #13392f; background: #a9e7d2; }
+.brand strong, .brand small { display: block; }
+.brand strong { font-size: 19px; font-weight: 700; line-height: 1.12; letter-spacing: .12em; }
+.brand small { color: #a5c6ba; font-size: 9px; font-weight: 700; letter-spacing: .19em; margin-top: 5px; }

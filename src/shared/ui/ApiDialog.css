@@ -1,0 +1,14 @@
+.api-dialog { width: min(510px, calc(100% - 28px)); max-height: calc(100% - 28px); padding: 0; border: 1px solid var(--border); border-radius: 16px; color: var(--ink); background: #fff; box-shadow: 0 22px 70px #09291d3b; }
+.api-dialog::backdrop { background: #102b2573; }
+.dialog-body { padding: 22px; }
+.dialog-header { display: flex; justify-content: space-between; margin-bottom: 14px; }
+.dialog-body h2 { margin: 4px 0 8px; font-size: 23px; }
+.dialog-description { color: #435d52; line-height: 1.8; }
+.dialog-context { background: #f4f7f5; margin-top: 14px; padding: 11px 13px; border-radius: 8px; }
+.dialog-context h3 { font-size: 13px; }
+.dialog-context dl { margin: 6px 0 0; }
+.dialog-context dl div { display: flex; align-items: baseline; gap: 10px; margin: 3px 0; font-size: 12px; }
+.dialog-context dt { color: var(--muted); flex: 0 0 95px; }
+.dialog-context dd { margin: 0; overflow-wrap: anywhere; }
+.dialog-note { display: flex; align-items: center; gap: 6px; margin-top: 15px; color: var(--muted); font-size: 12px; }
+.dialog-footer { display: flex; justify-content: flex-end; margin-top: 16px; }

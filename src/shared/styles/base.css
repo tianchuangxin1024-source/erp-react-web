@@ -1,0 +1,23 @@
+:root {
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #172b27;
+  background: #f5f7f6;
+  font-synthesis: none;
+  --ink: #172b27;
+  --muted: #596d65;
+  --border: #e2eae6;
+  --accent: #087960;
+  --accent-dark: #07614f;
+  --nav-bg: #102b25;
+}
+
+* { box-sizing: border-box; }
+body { min-width: 320px; margin: 0; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #209f85; outline-offset: 3px; }
+h1, h2, h3, p { margin: 0; }
+svg { flex-shrink: 0; }
