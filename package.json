@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "pwsh -NoProfile -File ./scripts/deploy.ps1",
+    "docs:architecture": "node scripts/generate-architecture.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",

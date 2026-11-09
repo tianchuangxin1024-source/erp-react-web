@@ -1,22 +1,12 @@
 import Icon from '../../../shared/ui/Icon.jsx'
-import { activities } from '../dashboardData.js'
 
-export default function ActivityFeed() {
-  return (
-    <section className="panel dashboard-panel">
-      <div className="panel-heading">
-        <div><h2>近期动态</h2><p>最新财务操作记录</p></div>
-        <a className="text-button" href="#/system/logs">操作日志 <Icon name="chevron" size={14} /></a>
-      </div>
-      <div className="activity-list">
-        {activities.map(([icon, color, title, id, date]) => (
-          <div className="activity" key={id}>
-            <span className={`tile-icon ${color}`}><Icon name={icon} size={15} /></span>
-            <span><strong>{title}</strong><small>{id}</small></span>
-            <time>{date}</time>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
+export default function ActivityFeed({ activities }) {
+  return <section className="panel dashboard-panel">
+    <div className="panel-heading"><div><h2>近期动态</h2><p>最新财务操作记录</p></div><a className="text-button" href="#/system/logs">操作日志 <Icon name="chevron" size={14} /></a></div>
+    <div className="activity-list">{activities.length ? activities.map((item) => <a className="activity" key={item.id} href={`#/${item.resource}`}>
+      <span className="tile-icon mint"><Icon name="clock" size={15} /></span>
+      <span><strong>{item.operation}</strong><small>{item.resource} · #{item.object_id}</small></span>
+      <time>{String(item.operated_at).replace('T', ' ').slice(0, 16)}</time>
+    </a>) : <p className="muted">暂无操作记录</p>}</div>
+  </section>
 }

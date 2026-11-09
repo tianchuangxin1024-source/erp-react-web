@@ -1,9 +1,10 @@
+import { canAccess } from '../../features/auth/permissions.js'
 import { useState } from 'react'
 import Icon from '../../shared/ui/Icon.jsx'
 import Brand from '../../shared/ui/Brand.jsx'
 import { modules, routeFor } from '../routing/routes.js'
 
-export default function Sidebar({ route, activeModule, open, onNavigate }) {
+export default function Sidebar({ route, activeModule, open, onNavigate, user }) {
   const [expanded, setExpanded] = useState({})
   return (
     <aside className={`sidebar ${open ? 'sidebar-open' : ''}`} id="sidebar">
@@ -12,7 +13,7 @@ export default function Sidebar({ route, activeModule, open, onNavigate }) {
         <p className="nav-label">财务工作台</p>
         <a href="#/" className={`nav-item ${!activeModule ? 'current' : ''}`} aria-current={!activeModule ? 'page' : undefined} onClick={onNavigate}><Icon name="home" size={18} /> 工作台首页</a>
         <p className="nav-label modules-label">业务模块</p>
-        {modules.map((module) => {
+        {modules.map((module) => ({ ...module, pages: module.pages.filter((page) => canAccess(user, routeFor(module, page))) })).filter((module) => module.pages.length).map((module) => {
           const isActive = activeModule?.id === module.id
           const isExpanded = expanded[module.id] ?? isActive
           return <div className="nav-group" key={module.id}>
@@ -24,7 +25,7 @@ export default function Sidebar({ route, activeModule, open, onNavigate }) {
           </div>
         })}
       </nav>
-      <div className="sidebar-footer"><span className="online-dot" /><span>演示工作空间</span><span className="sidebar-version">V1.0</span></div>
+      <div className="sidebar-footer"><span className="online-dot" /><span>财务工作空间</span><span className="sidebar-version">V1.0</span></div>
     </aside>
   )
 }

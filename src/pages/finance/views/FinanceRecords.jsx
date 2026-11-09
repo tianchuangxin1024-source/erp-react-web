@@ -20,7 +20,7 @@ function RowActions({ id, actions, onAction }) {
   )
 }
 
-export default function FinanceRecords({ page, actions, rowActions, selected, onSelectionChange, onAction }) {
+export default function FinanceRecords({ page, actions, rowActions, rowIds, selected, onSelectionChange, onAction }) {
   const { rows, columns } = page
   const hasSelection = actions.some(([, , scope]) => scope === 'selection')
   const allSelected = rows.length > 0 && selected.length === rows.length
@@ -34,7 +34,7 @@ export default function FinanceRecords({ page, actions, rowActions, selected, on
       <div className="data-header">
         <div>
           <h2>{page.title}{page.id === 'ledgers' ? '结果' : '记录'}</h2>
-          <p>{rows.length ? `演示记录 · 共 ${rows.length} 条` : '查询结果将在接口接入后显示'}</p>
+          <p>{rows.length ? `当前页 · 共 ${rows.length} 条` : '按当前条件查询'}</p>
         </div>
         <div className="toolbar">
           {actions.map((action) => (
@@ -54,7 +54,7 @@ export default function FinanceRecords({ page, actions, rowActions, selected, on
                     type="checkbox"
                     aria-label="全选凭证"
                     checked={allSelected}
-                    onChange={(event) => onSelectionChange(event.target.checked ? rows.map(([id]) => id) : [])}
+                    onChange={(event) => onSelectionChange(event.target.checked ? rowIds : [])}
                   />
                 </th>
               )}
@@ -63,8 +63,8 @@ export default function FinanceRecords({ page, actions, rowActions, selected, on
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
-              const [id] = row
+            {rows.map((row, index) => {
+              const id = rowIds[index] ?? row[0]
               return (
                 <tr key={id}>
                   {hasSelection && (
@@ -93,7 +93,7 @@ export default function FinanceRecords({ page, actions, rowActions, selected, on
         <div className="empty-state">
           <span className="tile-icon mint"><Icon name="inbox" size={23} /></span>
           <strong>暂无查询结果</strong>
-          <p>设置查询条件后，点击「查询」查看所需的接口功能。</p>
+          <p>请调整查询条件，或新增业务记录。</p>
         </div>
       )}
       {selected.length > 0 && <div className="selection-note">已选中 {selected.length} 条记录</div>}

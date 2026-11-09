@@ -1,39 +1,41 @@
-import Icon from '../../shared/ui/Icon.jsx'
+import { useEffect, useState } from 'react'
+import { listRecords } from '../../features/finance/api/resources.js'
+import MetricCards from './views/MetricCards.jsx'
+import TaskList from './views/TaskList.jsx'
+import QuickLinks from './views/QuickLinks.jsx'
 import ActivityFeed from './views/ActivityFeed.jsx'
 import CashFlowPanel from './views/CashFlowPanel.jsx'
-import MetricCards from './views/MetricCards.jsx'
-import QuickLinks from './views/QuickLinks.jsx'
-import TaskList from './views/TaskList.jsx'
 import './DashboardPage.css'
 
-export default function DashboardPage({ openApi }) {
-  function showPeriod() {
-    openApi({
-      title: '查询会计期间',
-      description: '返回当前启用的会计期间、开始及结束日期和结账状态，供工作台指标及业务页面选择。',
-      context: [['会计期间', '2026-11']],
-    })
-  }
-
-  return (
-    <>
-      <div className="page-heading dashboard-heading">
-        <div>
-          <div className="eyebrow">财务工作台</div>
-          <h1>财务总览</h1>
-          <p>查看资金表现、待办事项与近期财务动态。</p>
-        </div>
-        <button type="button" className="button secondary" onClick={showPeriod}>
-          <Icon name="calendar" size={17} /> 2026 年 11 月
-        </button>
+export default function DashboardPage() {
+  const [period, setPeriod] = useState(() => new Date().toLocaleDateString('sv-SE').slice(0, 7))
+  const [currency, setCurrency] = useState('CNY')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    const controller = new AbortController()
+    listRecords('dashboard', { period_code: period, currency }, controller.signal)
+      .then((result) => { setData(result); setError('') })
+      .catch((failure) => { if (failure.name !== 'AbortError') setError(failure.message) })
+    return () => controller.abort()
+  }, [period, currency])
+  return <>
+    <div className="page-heading dashboard-heading">
+      <div><div className="eyebrow">财务工作台</div><h1>财务总览</h1><p>查看资金表现、待办事项与近期财务动态。</p></div>
+      <div className="filter-buttons">
+        <label className="filter-field">会计期间<input type="month" value={period} onChange={(event) => setPeriod(event.target.value)} required /></label>
+        <label className="filter-field">币种<select value={currency} onChange={(event) => setCurrency(event.target.value)}>{['CNY', 'USD', 'EUR', 'HKD'].map((item) => <option key={item}>{item}</option>)}</select></label>
       </div>
-      <MetricCards openApi={openApi} />
+    </div>
+    {error && <p className="request-error" role="alert">{error}</p>}
+    {!data ? <p role="status">正在加载工作台…</p> : <>
+      <MetricCards data={data} currency={currency} />
       <div className="dashboard-grid">
-        <CashFlowPanel openApi={openApi} />
-        <TaskList />
+        <CashFlowPanel trend={data.trend} period={period} />
+        <TaskList tasks={data.tasks} />
         <QuickLinks />
-        <ActivityFeed />
+        <ActivityFeed activities={data.activities} />
       </div>
-    </>
-  )
+    </>}
+  </>
 }
