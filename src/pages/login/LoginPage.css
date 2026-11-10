@@ -36,3 +36,5 @@
   .login-visual-content, .login-visual-footer { display: none; }
   .login-main { min-height: calc(100svh - 84px); padding-inline: 20px; }
 }
+
+.auth-switch { margin-top: 18px; text-align: center; color: var(--muted); font-size: 13px; }

@@ -29,6 +29,7 @@ export default function LoginForm({ onLogin }) {
         {error && <p className="login-error" role="alert">{error}</p>}
         <button type="submit" className="button primary login-submit" disabled={busy}>{busy ? '登录中…' : '登录系统'} <Icon name="arrow" size={18} /></button>
       </form>
+      <p className="auth-switch">还没有账号？ <a className="text-button" href="#/register">立即注册</a></p>
     </div>
   )
 }

@@ -24,9 +24,9 @@
 
 ### 开发环境
 
-[vite.config.js](vite.config.js) 默认把 /api 代理到 http://39.106.106.98:8080。浏览器访问本机 Vite 地址，再由 Vite 在服务端转发 HTTP 请求。request 始终调用相对路径 /api，登录 Cookie 属于浏览器访问的前端主机，后续请求继续携带会话。
+[vite.config.js](vite.config.js) 默认把 /api 代理到本地 erp-server 的 http://127.0.0.1:8080。先启动本地服务端，再执行 npm run dev。浏览器访问本机 Vite 地址，再由 Vite 在服务端转发 HTTP 请求。request 始终调用相对路径 /api，登录 Cookie 属于浏览器访问的前端主机，后续请求继续携带会话。
 
-创建 .env.local 可以覆写 ERP_API_TARGET。例如本地样例服务使用 http://127.0.0.1:18080。变量仅由 Vite 的配置代码读取，没有 VITE_ 前缀，也没有嵌入前端构建产物。修改后需要重启开发或预览服务。
+复制 .env.example 为 .env.local 可以覆写 ERP_API_TARGET。例如本地样例服务使用 http://127.0.0.1:18080，远程服务使用 http://39.106.106.98:8080。终端环境变量优先于配置文件，清除此前设置的 ERP_API_TARGET 后才能恢复配置文件或默认地址。变量仅由 Vite 的配置代码读取，没有 VITE_ 前缀，也没有嵌入前端构建产物。修改后需要重启开发或预览服务。
 
 ERP_API_TARGET 只接受 HTTP/HTTPS 来源，不允许路径、查询参数或账号密码。Vite 同时为 server 与 preview 配置代理，默认监听 127.0.0.1。生产环境由 Nginx 接管 HTTP 请求。
 

@@ -1,6 +1,6 @@
 # 衡账前端项目架构与逐页接口说明
 
-本文基于当前源码生成，覆盖登录页、财务总览和 35 个业务页。更新日期为 2026-11-09。逐页操作以 operations.js 的真实定义为准，页面描述中的规划功能与已实现接口存在差别时，以本文操作表和后端校验为准。
+本文基于当前源码生成，覆盖登录页、注册页、财务总览和 35 个业务页。更新日期为 2026-11-10。逐页操作以 operations.js 的真实定义为准，页面描述中的规划功能与已实现接口存在差别时，以本文操作表和后端校验为准。
 
 ## 技术栈与运行边界
 
@@ -31,6 +31,8 @@ src/
   pages/
     login/LoginPage.jsx            登录页面布局
     login/views/                   LoginHero、LoginForm
+    register/RegisterPage.jsx      注册页面布局
+    register/views/                RegisterForm、CaptchaField
     dashboard/DashboardPage.jsx    工作台请求与视图装配
     dashboard/views/               指标卡、趋势图、待办、快捷入口、动态
     finance/FinancePage.jsx        35 个业务页共用的页面容器
@@ -72,6 +74,10 @@ flowchart TD
   App --> Login[LoginPage]
   Login --> Hero[LoginHero]
   Login --> Form[LoginForm]
+  App --> Register[RegisterPage]
+  Register --> Hero
+  Register --> RegisterForm[RegisterForm]
+  RegisterForm --> CaptchaField[CaptchaField]
   App --> Layout[WorkspaceLayout]
   Layout --> Nav[Sidebar]
   App --> Dashboard[DashboardPage]
@@ -99,7 +105,7 @@ flowchart TD
 
 [main.jsx](src/main.jsx) 导入基础与通用样式，通过 createRoot 挂载 App，开发期启用 StrictMode。
 
-[App.jsx](src/app/App.jsx) 使用 useSession 获取 user、loading、error、login、logout。恢复会话期间显示加载状态，未登录时返回 LoginPage，登录后装配 WorkspaceLayout。业务路由进入 FinancePage，根路由进入 DashboardPage。
+[App.jsx](src/app/App.jsx) 使用 useSession 获取 user、loading、error、login、logout。恢复会话期间显示加载状态，未登录时根据 #/register 返回 RegisterPage，其余地址返回 LoginPage，登录后装配 WorkspaceLayout。业务路由进入 FinancePage，根路由进入 DashboardPage。
 
 [routes.js](src/app/routing/routes.js) 遍历 modules，使用 routeFor(module,page) 生成 module.id/page.id，再由 Map 保存页面配置。getRoute(route) 返回 module 与 page。目前未知 Hash 会回退到财务总览。
 
@@ -148,6 +154,24 @@ sequenceDiagram
 ```
 
 前端没有本地密码比对，不把登录成功标记写入 sessionStorage 或 localStorage。登录后的有效性以服务端会话为准。登录成功保留原来想访问的 Hash，退出成功回到根 Hash。
+
+## 注册页面
+
+路由为 #/register，登录页的“立即注册”进入此页面，注册成功后通过“前往登录”返回 #/login。
+
+| 文件或组件 | 职责 |
+| --- | --- |
+| [RegisterPage](src/pages/register/RegisterPage.jsx) | 复用 LoginHero，组合 RegisterForm 与认证页布局 |
+| [RegisterForm](src/pages/register/views/RegisterForm.jsx) | 仅设置账号、密码，保存图形验证码输入及提交结果 |
+| [CaptchaField](src/pages/register/views/CaptchaField.jsx) | 展示图形验证码、输入框、刷新入口与加载错误 |
+| [useRegistrationCaptcha](src/features/auth/useRegistrationCaptcha.js) | 加载图形验证码、取消失效请求、管理刷新状态 |
+| [registrationApi](src/features/auth/registrationApi.js) | getRegistrationCaptcha 与 registerAccount，统一调用 request |
+
+useRegistrationCaptcha 在组件挂载时调用 getRegistrationCaptcha(signal)，发送 GET /api/auth/captcha，读取 data.image 的 PNG Data URL。请求使用当前浏览器 Cookie，答案保存在后端会话中，响应只返回图片及 expires_in。点击图片或“换一张”清空输入并加载新图片。
+
+点击注册时，RegisterForm.submit → registerAccount({username,password,captcha}) → request 发出 POST /api/auth/register。服务端先验证当前会话的图形验证码，验证码五分钟有效，每次注册尝试后消费；再以账号和密码创建用户。未增加手机、邮箱、确认密码或密码复杂度字段。
+
+注册失败会显示服务端 message 并自动刷新验证码；成功会清空密码和验证码，显示注册成功与登录链接。注册不自动建立登录会话。新用户的 name 默认等于账号，归入“注册用户”普通角色，业务权限由管理员配置。
 
 ## 财务总览页面
 

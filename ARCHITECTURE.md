@@ -1,6 +1,6 @@
 # 衡账前端项目架构与逐页接口说明
 
-本文基于当前源码生成，覆盖登录页、财务总览和 35 个业务页。更新日期为 2026-11-09。逐页操作以 operations.js 的真实定义为准，页面描述中的规划功能与已实现接口存在差别时，以本文操作表和后端校验为准。
+本文基于当前源码生成，覆盖登录页、注册页、财务总览和 35 个业务页。更新日期为 2026-11-10。逐页操作以 operations.js 的真实定义为准，页面描述中的规划功能与已实现接口存在差别时，以本文操作表和后端校验为准。
 
 ## 技术栈与运行边界
 
@@ -31,6 +31,8 @@ src/
   pages/
     login/LoginPage.jsx            登录页面布局
     login/views/                   LoginHero、LoginForm
+    register/RegisterPage.jsx      注册页面布局
+    register/views/                RegisterForm、CaptchaField
     dashboard/DashboardPage.jsx    工作台请求与视图装配
     dashboard/views/               指标卡、趋势图、待办、快捷入口、动态
     finance/FinancePage.jsx        35 个业务页共用的页面容器
@@ -72,6 +74,10 @@ flowchart TD
   App --> Login[LoginPage]
   Login --> Hero[LoginHero]
   Login --> Form[LoginForm]
+  App --> Register[RegisterPage]
+  Register --> Hero
+  Register --> RegisterForm[RegisterForm]
+  RegisterForm --> CaptchaField[CaptchaField]
   App --> Layout[WorkspaceLayout]
   Layout --> Nav[Sidebar]
   App --> Dashboard[DashboardPage]
@@ -99,7 +105,7 @@ flowchart TD
 
 [main.jsx](src/main.jsx) 导入基础与通用样式，通过 createRoot 挂载 App，开发期启用 StrictMode。
 
-[App.jsx](src/app/App.jsx) 使用 useSession 获取 user、loading、error、login、logout。恢复会话期间显示加载状态，未登录时返回 LoginPage，登录后装配 WorkspaceLayout。业务路由进入 FinancePage，根路由进入 DashboardPage。
+[App.jsx](src/app/App.jsx) 使用 useSession 获取 user、loading、error、login、logout。恢复会话期间显示加载状态，未登录时根据 #/register 返回 RegisterPage，其余地址返回 LoginPage，登录后装配 WorkspaceLayout。业务路由进入 FinancePage，根路由进入 DashboardPage。
 
 [routes.js](src/app/routing/routes.js) 遍历 modules，使用 routeFor(module,page) 生成 module.id/page.id，再由 Map 保存页面配置。getRoute(route) 返回 module 与 page。目前未知 Hash 会回退到财务总览。
 
@@ -148,6 +154,24 @@ sequenceDiagram
 ```
 
 前端没有本地密码比对，不把登录成功标记写入 sessionStorage 或 localStorage。登录后的有效性以服务端会话为准。登录成功保留原来想访问的 Hash，退出成功回到根 Hash。
+
+## 注册页面
+
+路由为 #/register，登录页的“立即注册”进入此页面，注册成功后通过“前往登录”返回 #/login。
+
+| 文件或组件 | 职责 |
+| --- | --- |
+| [RegisterPage](src/pages/register/RegisterPage.jsx) | 复用 LoginHero，组合 RegisterForm 与认证页布局 |
+| [RegisterForm](src/pages/register/views/RegisterForm.jsx) | 仅设置账号、密码，保存图形验证码输入及提交结果 |
+| [CaptchaField](src/pages/register/views/CaptchaField.jsx) | 展示图形验证码、输入框、刷新入口与加载错误 |
+| [useRegistrationCaptcha](src/features/auth/useRegistrationCaptcha.js) | 加载图形验证码、取消失效请求、管理刷新状态 |
+| [registrationApi](src/features/auth/registrationApi.js) | getRegistrationCaptcha 与 registerAccount，统一调用 request |
+
+useRegistrationCaptcha 在组件挂载时调用 getRegistrationCaptcha(signal)，发送 GET /api/auth/captcha，读取 data.image 的 PNG Data URL。请求使用当前浏览器 Cookie，答案保存在后端会话中，响应只返回图片及 expires_in。点击图片或“换一张”清空输入并加载新图片。
+
+点击注册时，RegisterForm.submit → registerAccount({username,password,captcha}) → request 发出 POST /api/auth/register。服务端先验证当前会话的图形验证码，验证码五分钟有效，每次注册尝试后消费；再以账号和密码创建用户。未增加手机、邮箱、确认密码或密码复杂度字段。
+
+注册失败会显示服务端 message 并自动刷新验证码；成功会清空密码和验证码，显示注册成功与登录链接。注册不自动建立登录会话。新用户的 name 默认等于账号，归入“注册用户”普通角色，业务权限由管理员配置。
 
 ## 财务总览页面
 
@@ -214,10 +238,10 @@ listRecords(resource,params,signal) 拼查询参数，调用 financeRequest。fi
 下文每个业务页均列出实际 View 组件、查询字段、展示字段、操作路径和请求参数。前端执行请求的公共方法已在上文解释，每页的“操作”表给出展开后的路径。
 
 
-
 | 序号 | 模块 | 页面 | 路由 |
 | --- | --- | --- | --- |
 | — | 认证 | [登录页面](#登录页面) | 未登录时显示 |
+| — | 认证 | [注册页面](#注册页面) | `#/register` |
 | — | 工作台 | [财务总览](#财务总览页面) | `#/` |
 | 1 | 总账管理 | [会计科目](#1-会计科目) | `#/gl/accounts` |
 | 2 | 总账管理 | [凭证管理](#2-凭证管理) | `#/gl/vouchers` |
@@ -2216,9 +2240,9 @@ filters 保存正在编辑的条件，query 保存已提交条件；selected 保
 
 ### 开发环境
 
-[vite.config.js](vite.config.js) 默认把 /api 代理到 http://39.106.106.98:8080。浏览器访问本机 Vite 地址，再由 Vite 在服务端转发 HTTP 请求。request 始终调用相对路径 /api，登录 Cookie 属于浏览器访问的前端主机，后续请求继续携带会话。
+[vite.config.js](vite.config.js) 默认把 /api 代理到本地 erp-server 的 http://127.0.0.1:8080。先启动本地服务端，再执行 npm run dev。浏览器访问本机 Vite 地址，再由 Vite 在服务端转发 HTTP 请求。request 始终调用相对路径 /api，登录 Cookie 属于浏览器访问的前端主机，后续请求继续携带会话。
 
-创建 .env.local 可以覆写 ERP_API_TARGET。例如本地样例服务使用 http://127.0.0.1:18080。变量仅由 Vite 的配置代码读取，没有 VITE_ 前缀，也没有嵌入前端构建产物。修改后需要重启开发或预览服务。
+复制 .env.example 为 .env.local 可以覆写 ERP_API_TARGET。例如本地样例服务使用 http://127.0.0.1:18080，远程服务使用 http://39.106.106.98:8080。终端环境变量优先于配置文件，清除此前设置的 ERP_API_TARGET 后才能恢复配置文件或默认地址。变量仅由 Vite 的配置代码读取，没有 VITE_ 前缀，也没有嵌入前端构建产物。修改后需要重启开发或预览服务。
 
 ERP_API_TARGET 只接受 HTTP/HTTPS 来源，不允许路径、查询参数或账号密码。Vite 同时为 server 与 preview 配置代理，默认监听 127.0.0.1。生产环境由 Nginx 接管 HTTP 请求。
 

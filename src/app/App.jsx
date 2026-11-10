@@ -3,6 +3,7 @@ import { useSession } from '../features/auth/useSession.js'
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx'
 import FinancePage from '../pages/finance/FinancePage.jsx'
 import LoginPage from '../pages/login/LoginPage.jsx'
+import RegisterPage from '../pages/register/RegisterPage.jsx'
 import WorkspaceLayout from './layouts/WorkspaceLayout.jsx'
 import { getRoute } from './routing/routes.js'
 import { useHashRoute } from './routing/useHashRoute.js'
@@ -22,7 +23,7 @@ export default function App() {
   }
 
   if (loading) return <main className="page-content" role="status">正在恢复登录会话…</main>
-  if (!user) return <><LoginPage onLogin={login} />{error && <p className="request-error" role="alert">{error}</p>}</>
+  if (!user) return <>{route === 'register' ? <RegisterPage /> : <LoginPage onLogin={login} />}{error && <p className="request-error" role="alert">{error}</p>}</>
 
   const resource = current ? current.module.id + '/' + current.page.id : 'dashboard'
   return <WorkspaceLayout route={route} current={current} logout={handleLogout} user={user}>

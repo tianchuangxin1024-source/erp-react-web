@@ -1,0 +1,8 @@
+.captcha-row { display: flex; align-items: stretch; gap: 10px; }
+.captcha-row .login-input { flex: 1; min-width: 0; margin-bottom: 0; }
+.captcha-image { flex: 0 0 156px; height: 52px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; padding: 0; background: #eff7f3; color: var(--muted); }
+.captcha-image img { display: block; width: 100%; height: 100%; }
+.captcha-help { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 7px 0 16px; color: var(--muted); font-size: 12px; }
+.registration-success > .tile-icon { margin-bottom: 10px; }
+.registration-success > p { color: var(--muted); margin-bottom: 20px; }
+@media (max-width: 390px) { .captcha-row { flex-direction: column; } .captcha-image { flex-basis: auto; width: 156px; } }

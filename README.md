@@ -4,9 +4,23 @@
 
 ## 运行
 
-安装依赖后执行 `npm run dev`。Vite 将 `/api` 代理到 `http://39.106.106.98:8080`，可用环境变量 `ERP_API_TARGET` 覆盖。`.env.example` 提供配置示例。构建命令为 `npm run build`，静态部署时由反向代理把同源 `/api` 转发给服务端。
+先启动本地 `erp-server`，再安装依赖并执行 `npm run dev`。开发和预览环境默认将 `/api` 代理到 `http://127.0.0.1:8080`。浏览器通过前端同源地址访问接口，登录会话 Cookie 也由代理正常转发。
 
-登录使用服务端创建的账号和密码。Cookie 会话支持刷新恢复、退出和失效拦截。角色权限决定可访问的菜单和业务写入入口，服务端继续执行权限校验。
+后端端口不同或需要连接远程服务时，可复制 `.env.example` 为 `.env.local` 后设置 `ERP_API_TARGET`，并重启 Vite。也可以在当前终端指定地址。
+
+```powershell
+# 本地样例服务
+$env:ERP_API_TARGET = 'http://127.0.0.1:18080'
+npm run dev
+
+# 远程 ERP 服务
+$env:ERP_API_TARGET = 'http://39.106.106.98:8080'
+npm run dev
+```
+
+终端中的 `ERP_API_TARGET` 优先于 `.env.local`；若此前设置过远程地址，执行 `Remove-Item Env:ERP_API_TARGET -ErrorAction SilentlyContinue` 后再启动即可使用配置文件或本地默认地址。构建命令为 `npm run build`，静态部署时由反向代理把同源 `/api` 转发给服务端。
+
+登录页点击“立即注册”可创建账号。注册设置账号和密码，点击注册时由后端校验图形验证码；验证码可点击刷新。注册成功后使用账号和密码登录。新账号属于“注册用户”普通角色，业务权限由管理员分配。服务端新增接口后需重新启动 erp-server。Cookie 会话支持刷新恢复、退出和失效拦截。角色权限决定可访问的菜单和业务写入入口，服务端继续执行权限校验。
 
 页面查询、分页、详情、业务操作、XLSX 导出、CSV 导入以及凭证与报销附件均调用真实接口。操作表单支持多行凭证、报销明细、审批节点和报表公式。服务器暂未提供的 PDF 导出、网银模板、提醒、凭证模板和恢复入口会显示当前支持范围。
 
@@ -53,7 +67,7 @@ npm run dev
 
 ## 架构文档与生产部署
 
-[ARCHITECTURE.md](ARCHITECTURE.md) 覆盖登录、工作台和全部 35 个业务页，逐页说明 View 组件、状态、调用方法、接口路径、查询条件和操作字段。修改配置后运行 `npm run docs:architecture` 重新生成。
+[ARCHITECTURE.md](ARCHITECTURE.md) 覆盖登录、注册、工作台和全部 35 个业务页，逐页说明 View 组件、状态、调用方法、接口路径、查询条件和操作字段。修改配置后运行 `npm run docs:architecture` 重新生成。
 
 生产环境用 Nginx 提供静态前端，将同源 `/api` 代理到服务器的后端。默认目标为 `root@39.106.106.98`，发布根目录为 `/home/web`，前端使用 80 端口，后端使用 `127.0.0.1:8080`。
 

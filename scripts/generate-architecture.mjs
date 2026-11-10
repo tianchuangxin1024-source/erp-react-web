@@ -16,7 +16,7 @@ const sourceFiles = {
   expense: 'expenses', fa: 'fixedAssets', reports: 'reports', system: 'system',
 }
 const sections = [readFileSync('docs/architecture-intro.md', 'utf8').replace(/^\uFEFF/, '')]
-const indexRows = [["—", '认证', '[登录页面](#登录页面)', '未登录时显示'], ['—', '工作台', '[财务总览](#财务总览页面)', code('#/')]]
+const indexRows = [["—", '认证', '[登录页面](#登录页面)', '未登录时显示'], ['—', '认证', '[注册页面](#注册页面)', code('#/register')], ['—', '工作台', '[财务总览](#财务总览页面)', code('#/')]]
 let indexNumber = 0
 for (const module of modules) for (const page of module.pages) {
   indexNumber++
@@ -96,4 +96,4 @@ for (const [name, schema] of Object.entries(lineSchemas)) {
 }
 sections.push(readFileSync('docs/architecture-ending.md', 'utf8').replace(/^\uFEFF/, ''))
 writeFileSync('ARCHITECTURE.md', sections.join('\n\n').trimEnd() + '\n')
-console.log('ARCHITECTURE.md generated for login, dashboard and ' + count + ' business pages.')
+console.log('ARCHITECTURE.md generated for login, registration, dashboard and ' + count + ' business pages.')

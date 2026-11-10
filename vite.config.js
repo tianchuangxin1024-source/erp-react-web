@@ -4,7 +4,7 @@ import { defineConfig, loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const target = env.ERP_API_TARGET || 'http://39.106.106.98:8080'
+  const target = env.ERP_API_TARGET || 'http://127.0.0.1:8080'
   const upstream = new URL(target)
 
   if (!['http:', 'https:'].includes(upstream.protocol) || upstream.username || upstream.password || upstream.pathname !== '/' || upstream.search || upstream.hash) {
